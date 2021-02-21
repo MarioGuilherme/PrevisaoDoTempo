@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title> Previsão do Tempo </title>
+    <link rel="stylesheet" href="api.css">
+</head>
+
+<body>
+    <div class="caixa">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-md-12 col-lg-12 col-sm-12">
+                    <div class="row bg-primary pt-1">
+                        <div class="col-6 justify-content-center align-self-center d-flex">
+                            <h3 class="text-light text-center font-weight-bold dia">
+                            </h3>
+                        </div>
+                        <div class="col-6 text-left">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label class="text-light font-weight-bold">Dia:</label>
+                                    <button class="btn btn-success p-2 m-1 btn-hoje">Hoje</button>
+                                    <button class="btn btn-success p-2 m-1 btn-UmDia">1 dia</button>
+                                    <button class="btn btn-success p-2 m-1 btn-DoisDias">2 dias</button>
+                                    <button class="btn btn-success p-2 m-1 btn-TresDias">3 dias</button>
+                                    <button class="btn btn-success p-2 m-1 btn-QuatroDias">4 dias</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <label class="text-light font-weight-bold">Período:</label>
+                                    <button class="btn btn-success p-2 m-1 btn-agora">Agora: </button>
+                                    <button class="btn btn-success p-2 m-1 btn-manha">Manhã</button>
+                                    <button class="btn btn-success p-2 m-1 btn-tarde">Tarde</button>
+                                    <button class="btn btn-success p-2 m-1 btn-noite">Noite</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row bg-warning">
+                <div class="col-12 justify-content-center d-flex">
+                    <div class="col-lg-6 col-6 border text-center">
+                        <h4 class="periodo"></h4>
+                        <img class="card-img-bottom foto-periodo" src="">
+                    </div>
+                    <div class="col-6 col-lg-6">
+                        <div class="card bg-info text-dark+ font-weight-bold" style="height: 100%; width: 100%;">
+                            <div class="card-body text-right">
+                                <p class="cidade"></p>
+                                <p class="resumo"></p>
+                                <p class="tempMin"></p>
+                                <p class="tempMax"></p>
+                                <p class="ForcaVent"></p>
+                                <p class="DirVent"></p>
+                            </div>
+                            <div class="card-footer hora">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+
+
+            // Pega todas as informações do momento atual
+            agora = new Date(),
+                dia = agora.getDate().toString(),
+                mes = (agora.getMonth() + 1).toString(),
+                ano = agora.getFullYear(),
+                hora = agora.getHours(),
+                minuto = agora.getMinutes(),
+                segundo = agora.getSeconds()
+
+            // Verificar o período atual
+            if (hora >= 6 && hora < 12) {
+                var periodo = 'manha'
+                $(".btn-agora").attr('value', 'manha')
+                $(".btn-agora").empty()
+                $(".btn-agora").append('Agora: ' + periodo.toUpperCase(periodo))
+                $(".btn-manha").addClass('d-none')
+                $(".btn-manha").attr('disabled', true)
+            } else if (hora >= 12 && hora < 18) {
+                var periodo = 'tarde'
+                $(".btn-agora").attr('value', 'tarde')
+                $(".btn-agora").empty()
+                $(".btn-agora").append('Agora: ' + periodo.toUpperCase(periodo))
+                $(".btn-tarde").addClass('d-none')
+                $(".btn-tarde").attr('disabled', true)
+            } else {
+                var periodo = 'noite'
+                $(".btn-agora").attr('value', 'noite')
+                $(".btn-agora").empty()
+                $(".btn-agora").append('Agora: ' + periodo.toUpperCase(periodo))
+                $(".btn-noite").addClass('d-none')
+                $(".btn-noite").attr('disabled', true)
+            }
+
+            // Prepara os dias futuros
+            SegundoDia = (dia * 1) + 1
+            TerceiroDia = (dia * 1) + 2
+            QuartoDia = (dia * 1) + 3
+            QuintoDia = (dia * 1) + 4
+
+            // Transformar o segundo, minuto, hora, dia e mês no formato de dois caracter
+            if (mes < 10) {
+                mes = '0' + mes
+            }
+            if (dia < 10) {
+                dia = '0' + dia
+            }
+            if (hora < 10) {
+                hora = '0' + hora
+            }
+            if (minuto < 10) {
+                minuto = '0' + minuto
+            }
+            if (segundo < 10) {
+                segundo = '0' + segundo
+            }
+
+            // A data atual no formato adequado
+            var dia = dia + "/" + mes + "/" + ano
+
+            // Preencher dados atuais
+            function httpGet(Url) {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("GET", Url, false);
+                xmlHttp.send(null);
+                return xmlHttp.responseText;
+            }
+
+            var url = 'https://apiprevmet3.inmet.gov.br/previsao/3508801'
+            geographic_info = httpGet(url)
+            var dados = JSON.parse(geographic_info)
+            $('.dia').append(dia)
+            $('.periodo').append(periodo.toUpperCase(periodo))
+            $(".foto-periodo").attr('src', 'img/' + periodo + '.jpg')
+            $('.cidade').append(dados['3508801'][dia][periodo]['entidade'] + '-' + dados['3508801'][dia]['noite']['uf'])
+            $('.tempMin').append('Mínima: ' + dados['3508801'][dia][periodo]['temp_min'] + 'ºC')
+            $(".tempMax").append('Máxima: ' + dados['3508801'][dia][periodo]['temp_max'] + 'ºC')
+            $('.DirVent').append('Direção dos ventos: ' + dados['3508801'][dia][periodo]['dir_vento'])
+            $(".ForcaVent").append('Intensidade do Vento: ' + dados['3508801'][dia][periodo]['int_vento'])
+            $(".resumo").append(dados['3508801'][dia][periodo]['resumo'])
+            $('.hora').append('Agora são ' + hora + ':' + minuto + ':' + segundo)
+
+            $(".btn-manha").click(function() {
+
+                function httpGet(Url) {
+                    var xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open("GET", Url, false);
+                    xmlHttp.send(null);
+                    return xmlHttp.responseText;
+                }
+
+                var url = 'https://apiprevmet3.inmet.gov.br/previsao/3508801'
+                geographic_info = httpGet(url)
+                var dados = JSON.parse(geographic_info)
+                $('.periodo').empty()
+                $(".periodo").append('MANHÃ')
+                $(".foto-periodo").attr('src', 'img/manha.jpg')
+                $('.cidade').empty()
+                $('.cidade').append(dados['3508801'][dia]['manha']['entidade'] + '-' + dados['3508801'][dia]['noite']['uf'])
+                $('.tempMin').empty()
+                $('.tempMin').append('Mínima: ' + dados['3508801'][dia]['manha']['temp_min'] + 'ºC')
+                $('.tempMax').empty()
+                $(".tempMax").append('Máxima: ' + dados['3508801'][dia]['manha']['temp_max'] + 'ºC')
+                $('.DirVent').empty()
+                $('.DirVent').append('Diração dos Ventos: ' + dados['3508801'][dia]['manha']['dir_vento'])
+                $(".ForcaVent").empty()
+                $(".ForcaVent").append('Intensidade do Vento: ' + dados['3508801'][dia]['manha']['int_vento'])
+                $(".resumo").empty()
+                $(".resumo").append(dados['3508801'][dia]['manha']['resumo'])
+
+            })
+
+            $(".btn-tarde").click(function() {
+
+                function httpGet(Url) {
+                    var xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open("GET", Url, false);
+                    xmlHttp.send(null);
+                    return xmlHttp.responseText;
+                }
+
+                var url = 'https://apiprevmet3.inmet.gov.br/previsao/3508801'
+                geographic_info = httpGet(url)
+                var dados = JSON.parse(geographic_info)
+                $('.periodo').empty()
+                $(".periodo").append('TARDE')
+                $(".foto-periodo").attr('src', 'img/tarde.jpg')
+                $('.cidade').empty()
+                $('.cidade').append(dados['3508801'][dia]['tarde']['entidade'] + '-' + dados['3508801'][dia]['noite']['uf'])
+                $('.tempMin').empty()
+                $('.tempMin').append('Mínima: ' + dados['3508801'][dia]['tarde']['temp_min'] + 'ºC')
+                $('.tempMax').empty()
+                $(".tempMax").append('Máxima: ' + dados['3508801'][dia]['tarde']['temp_max'] + 'ºC')
+                $('.DirVent').empty()
+                $('.DirVent').append('Diração dos Ventos: ' + dados['3508801'][dia]['tarde']['dir_vento'])
+                $(".ForcaVent").empty()
+                $(".ForcaVent").append('Intensidade do Vento: ' + dados['3508801'][dia]['tarde']['int_vento'])
+                $(".resumo").empty()
+                $(".resumo").append(dados['3508801'][dia]['tarde']['resumo'])
+
+            })
+
+        })
+    </script>
+</body>
+
+</html>
+
+</html>
